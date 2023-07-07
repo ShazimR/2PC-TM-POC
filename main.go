@@ -10,7 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "2pc-tm-poc/transaction" // Update with your package name
+	pb "2pc-tm-poc/transaction"
 )
 
 // Placeholder functions to simulate rpc to other services
@@ -26,10 +26,6 @@ func PrepareSimulateService(name string, success bool) bool {
 	}
 
 	return success
-}
-
-func isSuccessful(A bool, B bool, C bool) bool {
-	return A && B && C
 }
 
 func CommitSimulateService(name string) {
@@ -56,6 +52,10 @@ func CommitChanges(success bool) string {
 	}
 }
 
+func isSuccessful(A bool, B bool, C bool) bool {
+	return A && B && C
+}
+
 // TransactionManagerServer represents the transaction manager
 type TransactionManagerServer struct {
 	pb.UnimplementedTransactionManagerServer
@@ -63,7 +63,7 @@ type TransactionManagerServer struct {
 
 // PerformOperation handles the PerformOperation RPC call
 func (s *TransactionManagerServer) PerformOperation(ctx context.Context, req *pb.OperationRequest) (*pb.OperationResponse, error) {
-	fmt.Println("\nNew Request\n")
+	fmt.Println("\n\nNew Request")
 
 	test := req.GetTest()
 
@@ -86,16 +86,10 @@ func (s *TransactionManagerServer) PerformOperation(ctx context.Context, req *pb
 }
 
 func main() {
-	// Create a new gRPC server
 	server := grpc.NewServer()
-
-	// Initialize the transaction manager
 	transactionManager := &TransactionManagerServer{}
-
-	// Register the transaction manager with the gRPC server
 	pb.RegisterTransactionManagerServer(server, transactionManager)
 
-	// Start the gRPC server
 	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
