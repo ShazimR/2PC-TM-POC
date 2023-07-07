@@ -14,15 +14,15 @@ import (
 )
 
 // Placeholder functions to simulate rpc to other services
-func SimulateService(name string, success bool) bool {
+func PrepareSimulateService(name string, success bool) bool {
 	var delay int = rand.Intn(5)
 	fmt.Printf("Service %s is using the DB\n", name)
 	time.Sleep(time.Duration(delay) * time.Second)
 
 	if success {
-		fmt.Printf("Service %s complete!\n", name)
+		fmt.Printf("Service %s completed!\n", name)
 	} else {
-		fmt.Printf("Service %s aborted!\n", name)
+		fmt.Printf("Service %s failed!\n", name)
 	}
 
 	return success
@@ -32,6 +32,30 @@ func isSuccessful(A bool, B bool, C bool) bool {
 	return A && B && C
 }
 
+func CommitSimulateService(name string) {
+	fmt.Printf("Service %s commited\n", name)
+}
+
+func AbortSimulateService(name string) {
+	fmt.Printf("Service %s aborted\n", name)
+}
+
+func CommitChanges(success bool) string {
+	if success {
+		go CommitSimulateService("A")
+		go CommitSimulateService("B")
+		go CommitSimulateService("C")
+		time.Sleep(1 * time.Second)
+		return "Operation commited successfully!"
+	} else {
+		go AbortSimulateService("A")
+		go AbortSimulateService("B")
+		go AbortSimulateService("C")
+		time.Sleep(1 * time.Second)
+		return "Operation aborted successfully!"
+	}
+}
+
 // TransactionManagerServer represents the transaction manager
 type TransactionManagerServer struct {
 	pb.UnimplementedTransactionManagerServer
@@ -39,7 +63,10 @@ type TransactionManagerServer struct {
 
 // PerformOperation handles the PerformOperation RPC call
 func (s *TransactionManagerServer) PerformOperation(ctx context.Context, req *pb.OperationRequest) (*pb.OperationResponse, error) {
+	fmt.Println("\nNew Request\n")
+
 	test := req.GetTest()
+
 	A := test[0] == '1'
 	B := test[1] == '1'
 	C := test[2] == '1'
@@ -48,16 +75,12 @@ func (s *TransactionManagerServer) PerformOperation(ctx context.Context, req *pb
 	outB := make(chan bool)
 	outC := make(chan bool)
 
-	go func() { outA <- SimulateService("A", A) }()
-	go func() { outB <- SimulateService("B", B) }()
-	go func() { outC <- SimulateService("C", C) }()
+	go func() { outA <- PrepareSimulateService("A", A) }()
+	go func() { outB <- PrepareSimulateService("B", B) }()
+	go func() { outC <- PrepareSimulateService("C", C) }()
 
 	success := isSuccessful(<-outA, <-outB, <-outC)
-
-	message := "Operation Aborted!"
-	if success {
-		message = "Operation Commited!"
-	}
+	message := CommitChanges(success)
 
 	return &pb.OperationResponse{Success: success, Message: message}, nil
 }
