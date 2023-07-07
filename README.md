@@ -23,11 +23,17 @@ $ ./2pc-tm-poc.exe
 
 ## System Description
 
-TODO
+This system models a Transaction Manager (TM) for a distributed system that implements the two-phase commit (2PC) protocol to coordinate stateful changes between services with interdependencies. The TM server is a gRCP server that currently has a single service to test the correctness of the 2PC implementation.
 
 ### Components
 
-TODO
+- Transaction Manager (TM):
+
+- Services:
+
+- Database:
+
+- Client:
 
 ### Handling Transactions
 
@@ -35,14 +41,24 @@ General Flow of Service Calls and Messages
 
 ![sequence diagram](./TM_sequence_diagram.drawio.png)
 
+The actions performed on the database by the services (A, B, and C) after receiving a commit/abort message from the TM
+
 #### Success Scenarios
 
-TODO
+All services vote `yes`: TODO
 
 #### Failure Scenarios
 
-TODO
+At least one service votes `no`: TODO
 
 ## Technical Debt and Future Work
+
+Hard to determine without a deeper understanding of the current implementation and architecture being used. However, the 2PC protocol is very simple, and should be easy to implement.
+
+### Why use 2PC?
+
+TODO
+
+### Drawbacks of 2PC
 
 TODO
