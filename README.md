@@ -27,13 +27,13 @@ This system models a Transaction Manager (TM) for a distributed system that impl
 
 ### Components
 
-- Transaction Manager (TM): TODO
+- Transaction Manager (TM): A gRPC server that implements one procedure, PerformOperation. This takes a string `test` as input in the system. The procedure returns a boolean, `success`, and a string `message`. In the real system, any data related to the procedure should be passed and returned to and from the system.
 
-- Participants: TODO
+- Participants: The services A, B, and C are the participants of the PerformOperation procedure. They are represented as function calls that simulate a call to a service. In the real system, the participants will vary depending on the procedure being called.
 
-- Database: TODO
+- Database: Services A, B, and C will read and write to the database. This is not implemented in this system, however, the services will output messages to the standard output stream describing what they are simulating (ie. `Service A is accessing the database`).
 
-- Client: TODO
+- Client: The client is external to the system an will invoke a remote procedure call. An application like `Kreya` can be used to simulate a client.
 
 ### Handling Transactions
 
@@ -68,7 +68,7 @@ In order to test the correctness of the system, the PerformOperation procedure c
     "010" --> fail: service A votes `no`, service B votes `yes`, service C votes `no`
     "111" --> success: service A votes `yes`, service B votes `yes`, service C votes `yes`
 
-Now it is easy to see that given a request of "111" is the only success scenario (ie. all participants vote `yes`). In testing the system, all valid inputs were tested and a successful response was returned only for the "111" case, validating that the system functions correctly.
+Now it is easy to see that given a request of "111" is the only success scenario (ie. all participants vote `yes`). In testing the system, all valid inputs were tested and a successful response was returned only for the "111" case, validating that the system functions correctly (however, I omitted handling invalid inputs).
 
 ## Technical Debt and Future Work
 
