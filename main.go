@@ -29,11 +29,15 @@ func PrepareSimulateService(name string, success bool) bool {
 }
 
 func CommitSimulateService(name string) bool {
+	var delay int = rand.Intn(2)
+	time.Sleep(time.Duration(delay) * time.Second)
 	fmt.Printf("Service %s commited\n", name)
 	return true // is completed
 }
 
 func AbortSimulateService(name string) bool {
+	var delay int = rand.Intn(2)
+	time.Sleep(time.Duration(delay) * time.Second)
 	fmt.Printf("Service %s aborted\n", name)
 	return true // is completed
 }
