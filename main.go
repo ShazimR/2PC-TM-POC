@@ -28,28 +28,14 @@ func PrepareSimulateService(name string, success bool) bool {
 	return success
 }
 
-func CommitSimulateService(name string) {
+func CommitSimulateService(name string) bool {
 	fmt.Printf("Service %s commited\n", name)
+	return true // is completed
 }
 
-func AbortSimulateService(name string) {
+func AbortSimulateService(name string) bool {
 	fmt.Printf("Service %s aborted\n", name)
-}
-
-func CommitChanges(success bool) string {
-	if success {
-		go CommitSimulateService("A")
-		go CommitSimulateService("B")
-		go CommitSimulateService("C")
-		time.Sleep(1 * time.Second)
-		return "Operation commited successfully!"
-	} else {
-		go AbortSimulateService("A")
-		go AbortSimulateService("B")
-		go AbortSimulateService("C")
-		time.Sleep(1 * time.Second)
-		return "Operation aborted successfully!"
-	}
+	return true // is completed
 }
 
 func isSuccessful(A bool, B bool, C bool) bool {
@@ -75,12 +61,32 @@ func (s *TransactionManagerServer) PerformOperation(ctx context.Context, req *pb
 	outB := make(chan bool)
 	outC := make(chan bool)
 
+	// Phase 1:
 	go func() { outA <- PrepareSimulateService("A", A) }()
 	go func() { outB <- PrepareSimulateService("B", B) }()
 	go func() { outC <- PrepareSimulateService("C", C) }()
 
 	success := isSuccessful(<-outA, <-outB, <-outC)
-	message := CommitChanges(success)
+
+	// Phase 2:
+	var message string
+	if success {
+		fmt.Println("\nStarting Commit")
+		go func() { outA <- CommitSimulateService("A") }()
+		go func() { outB <- CommitSimulateService("B") }()
+		go func() { outC <- CommitSimulateService("C") }()
+		message = "Operation commited successfully!"
+	} else {
+		fmt.Println("\nStarting Abort")
+		go func() { outA <- AbortSimulateService("A") }()
+		go func() { outB <- AbortSimulateService("B") }()
+		go func() { outC <- AbortSimulateService("C") }()
+		message = "Operation aborted successfully!"
+	}
+	<-outA
+	<-outB
+	<-outC
+	fmt.Println("Operation Complete")
 
 	return &pb.OperationResponse{Success: success, Message: message}, nil
 }
